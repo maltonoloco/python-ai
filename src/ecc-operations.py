@@ -59,7 +59,7 @@ class Point:
         pass
 
 
-    def check(self: object, e: object) -> bool # check if point is on elliptic curve e 
+    def check(self: object, e: object) -> bool: # check if point is on elliptic curve e 
         pass
 
 
