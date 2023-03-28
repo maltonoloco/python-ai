@@ -29,7 +29,7 @@ class ECC:
 
 
     def ord_ECC(self: object) -> int:   # calculate rank of elliptic curve
-        return len(allPoints(self))
+        return len(self.allPoints(self))
 
 
     def double(self: object, p:object) -> object:   # doubles point p on elliptic curve
