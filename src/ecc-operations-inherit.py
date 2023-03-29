@@ -19,8 +19,6 @@ class ECC:
     def double(self, p: object) -> object:
         if not isinstance(p, Point):
             raise TypeError("p is not of type Point")
-        if not p.check(self):
-            raise ValueError("point p is not on curve")
 
         if p.inf:
             return p
@@ -41,10 +39,6 @@ class ECC:
             raise TypeError("p is not of type Point")
         if not isinstance(q, Point):
             raise TypeError("q is not of type Point")
-        if not p.check(self):
-            raise ValueError(f"point p {p} is not on curve")
-        if not q.check(self):
-            raise ValueError(f"point q {q} is not on curve")
         if p == q:
             return self.double(p)
         
@@ -103,8 +97,6 @@ class Point(ECC):
         pass
 
 
-    def check(self, ecc: ECC) -> bool: 
-        return (self.y ** 2) % ecc.p == (self.x ** 3 + ecc.a * self.x + ecc.b) % ecc.p
         
         
 def advancedEuklid(a: int, b: int) -> tuple:
