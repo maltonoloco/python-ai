@@ -1,20 +1,20 @@
 class ECC:
-    def __init__(self: object, a: int, b: int, p: int): # constructor
+    def __init__(self: object, a: int, b: int, p: int):
         self.a: int = a
         self.b: int = b
         self.p: int = p
 
 
-    def __str__(self: object) -> str:   # toString method
+    def __str__(self: object) -> str:
         return f"y**2 = x**3 + {self.a} * x + {self.b} mod {self.p}"
     
 
-    def check(self: object) -> bool:    # check if the elliptic curve is valid
+    def check(self: object) -> bool:
         return not (4 * self.a**3 + 27 * self.b**2) % self.p == 0
     
 
-    def allPoints(self: object) -> list:    # calculate all points on elliptic curve
-        arr = [None]
+    def allPoints(self: object) -> list:
+        arr = []
         tab1 = []
         tab2 = []
         for i in range(self.p):
@@ -28,41 +28,50 @@ class ECC:
         return arr
 
 
-    def ord_ECC(self: object) -> int:   # calculate rank of elliptic curve
+    def ord_ECC(self: object) -> int:
         return len(self.allPoints(self))
 
 
-    def double(self: object, p:object) -> object:   # doubles point p on elliptic curve
+    def double(self: object, p:object) -> object:
         pass
 
 
-    def add(self: object, p: object, q: object) -> object:  # add point p to point q und elliptic curve
+    def add(self: object, p: object, q: object) -> object:
         pass
 
 
-    def check_Point(self: object, p: object) -> bool:   # check if point p is on elliptic curve
+    def check_Point(self: object, p: object) -> bool:
         pass
             
 
 class Point:
 
-    def __init__(self: object, x: int, y: int): # constructor
+    def __init__(self: object, x: int, y: int):
         self.x = x
         self.y = y
 
 
-    def __str__(self: object) -> str:   # toString method
+    def __str__(self: object) -> str:
         return f"({self.x} | {self.y})"
+    
+    def __eq__(self: object, obj: object) -> bool:
+        if not isinstance(obj, Point):
+            raise TypeError("Can only compare instances of circle")
+        return (self.x == obj.x) and (self.y == obj.y)
 
 
-    def ord_Point(self: object, e: object) -> int:  # calculate rank on elliptic curve e
+    def ord_Point(self: object, e: object) -> int:
         pass
 
 
-    def check(self: object, e: object) -> bool: # check if point is on elliptic curve e 
+    def check(self: object, e: object) -> bool: 
         pass
 
 
-ec = ECC(2, 2, 17)
-print(ec)
-print(ec.check())
+ec = ECC(14, 5, 19)
+t = ec.allPoints()
+for i in t:
+    print(i)
+
+
+print(Point(1,1) == Point(1,1))
