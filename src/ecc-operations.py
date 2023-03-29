@@ -145,7 +145,7 @@ class Point:
     def generate_subgroup(self, ecc: ECC) -> list:
         """generates subgroup of generator"""
         if not self.check(ecc):
-            raise ValueError(f"point is not on curve: {e}")
+            raise ValueError(f"point is not on curve: {ecc}")
 
         tmp = self
         ret = [self]
