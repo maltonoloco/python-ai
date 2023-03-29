@@ -1,4 +1,3 @@
-import math
 class ECC:
     def __init__(self, a: int, b: int, p: int):
         if not is_prime(p):
@@ -11,29 +10,11 @@ class ECC:
         self.b: int = b
         self.p: int = p
 
-    
+    def __eq__(self, ecc: object) -> bool:
+        return self.a == ecc.a and self.b == ecc.b and self.p == ecc.p
+
     def __str__(self) -> str:
         return f"y**2 = x**3 + {self.a} * x + {self.b} mod {self.p}"
-    
-
-    def allPoints(self) -> list:
-        arr = [Point(0, 0, True)]
-        tab1 = []
-        tab2 = []
-        for i in range(self.p):
-            tab1.append((i, i**2 % self.p))
-            tab2.append((i, (i**3 + self.a * i + self.b) % self.p))
-        for i in tab2:
-            for q in range(2):
-                for j in tab1:
-                    if i[1] == j[1] and (Point(i[0], j[0])) not in arr:
-                        arr.append(Point(i[0], j[0]))
-        return arr
-
-
-    def ord_ECC(self) -> int:
-        return len(self.allPoints())
-
 
     def double(self, p: object) -> object:
         if not isinstance(p, Point):
@@ -52,7 +33,7 @@ class ECC:
         x3 = ((s ** 2) - p.x - p.x) % self.p
         y3 = ((s * (p.x - x3)) - p.y) % self.p
 
-        return Point(x3, y3, Point(x3, y3) == p)
+        return Point(x3, y3, self, Point(x3, y3, self) == p)
      
 
     def add(self, p: object, q: object) -> object:
@@ -65,7 +46,6 @@ class ECC:
         if not q.check(self):
             raise ValueError(f"point q {q} is not on curve")
         if p == q:
-            print(f"point p equals point q \n -> calling method double({p})")
             return self.double(p)
         
         if p.inf:
@@ -83,82 +63,50 @@ class ECC:
         x3 = ((s ** 2) - p.x - q.x) % self.p
         y3 = ((s * (p.x - x3)) - p.y) % self.p
 
-        return Point(x3, y3)
-            
+        return Point(x3, y3, self)
 
-    def satz_v_hasse(self) -> tuple:
-        low = (self.p + 1) - 2 * math.sqrt(self.p)
-        high = (self.p + 1) + 2 * math.sqrt(self.p)
-        return low, high
-
-class Point:
-
-    def __init__(self, x: int, y: int, inf = False):
+class Point(ECC):
+    def __init__(self, x: int, y: int, ecc: object, inf = False):
+        if not isinstance(ecc, ECC):
+            raise TypeError("parameter ecc is not of type ECC")
+        if not (y ** 2) % ecc.p == (x ** 3 + ecc.a * x + ecc.b) % ecc.p:
+            raise ValueError("point is not on curve")
+        ECC.__init__(self, ecc.a, ecc.b, ecc.p)
         self.x = x
         self.y = y
         self.inf = inf
-
 
     def __str__(self) -> str:
         if self.inf:
             return "Infinte"
         else:
             return f"({self.x} | {self.y})"
+
+    def get_super(self):
+        return ECC(self.a, self.b, self.p)
     
     def __eq__(self, obj: object) -> bool:
         if not isinstance(obj, Point):
             raise TypeError("obj is not of type Point")
-        return (self.x == obj.x) and (self.y == obj.y)
+        return (self.x == obj.x) and (self.y == obj.y) and (self.get_super() == obj.get_super())
 
+    def __add__(self, obj: object) -> object:
+        if not isinstance(obj, Point):
+            raise TypeError(f"can not add {type(obj)} to Point")
+        if not self.get_super() == obj.get_super():
+            raise ValueError("points are not on the same curve")
 
-    def ord_Point(self, ecc: ECC) -> int:
-        if not self.check(ecc):
-            raise ValueError(f"point is not on curve: {ecc}")
+        ecc = self.get_super()
+        return ecc.double(self)
 
-        tmp = self
-        it = 1
-        while not tmp.inf:
-            if tmp == self:
-                tmp = ecc.double(self)
-            else:
-                tmp = ecc.add(tmp, self)
-            it += 1
-        return it
-            
+    def __mul__(self, obj: int) -> object:
+        pass
 
 
     def check(self, ecc: ECC) -> bool: 
         return (self.y ** 2) % ecc.p == (self.x ** 3 + ecc.a * self.x + ecc.b) % ecc.p
-    
-
-    def get_inverted(self, ecc: ECC) -> object:
-        if not self.check(ecc):
-            raise ValueError(f"point is not on curve: {ecc}")
-        if self.inf:
-            return self
-
-        inv = Point(self.x, -self.y)
-        while inv.y < 0:
-            inv.y += ecc.p
-        return inv
-    
-    def generate_subgroup(self, ecc: ECC) -> list:
-        """generates subgroup of generator"""
-        if not self.check(ecc):
-            raise ValueError(f"point is not on curve: {e}")
-
-        tmp = self
-        ret = [self]
-        while not tmp.inf:
-            if tmp == self:
-                tmp = ecc.double(self)
-                ret.append(tmp)
-            else:
-                tmp = ecc.add(tmp, self)
-                ret.append(tmp)
-        return ret
-
-
+        
+        
 def advancedEuklid(a: int, b: int) -> tuple:
     """erweiterter euklidischer Algorithmus zur Inversenberechnung"""
     if a == 0:
@@ -176,6 +124,8 @@ def is_prime(n: int) -> bool:
     return True
 
 if __name__ == "__main__":
-    c = ECC(2,2,17)
-    p = Point(5, 1)
-    print(c.satz_v_hasse())
+    ec1 = ECC(2, 2, 17)
+    ec2 = ECC(3, 2, 17)
+    p1 = Point(5, 1, ec1)
+    p2 = Point(5, 1, ec1)
+    print(p1 + p2)
