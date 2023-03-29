@@ -4,6 +4,7 @@ class ECC:
         self.b: int = b
         self.p: int = p
 
+    
 
     def __str__(self: object) -> str:
         return f"y**2 = x**3 + {self.a} * x + {self.b} mod {self.p}"
@@ -32,8 +33,23 @@ class ECC:
         return len(self.allPoints(self))
 
 
-    def double(self: object, p:object) -> object:
-        pass
+    def double(self: object, p: object) -> object:
+        if not isinstance(p, Point):
+            raise TypeError("p is not of Type Point")
+        
+        eeA = advancedEuklid(p, 2 * p.y)
+        d = eeA[2] % self.p
+
+        s = ((3 * (p.x ** 2) + self.a) * d) % self.p
+
+        x3 = ((s ** 2) - p.x - p.x) % self.p
+        y3 = ((s * (p.x - x3)) - p.y) % self.p
+
+        return Point(x3, y3, Point(x3, y3) == p)
+        
+
+
+
 
 
     def add(self: object, p: object, q: object) -> object:
@@ -46,9 +62,10 @@ class ECC:
 
 class Point:
 
-    def __init__(self: object, x: int, y: int):
+    def __init__(self: object, x: int, y: int, inf = False):
         self.x = x
         self.y = y
+        self.inf = inf
 
 
     def __str__(self: object) -> str:
@@ -56,7 +73,7 @@ class Point:
     
     def __eq__(self: object, obj: object) -> bool:
         if not isinstance(obj, Point):
-            raise TypeError("Can only compare instances of circle")
+            raise TypeError("Can only compare instances of points")
         return (self.x == obj.x) and (self.y == obj.y)
 
 
@@ -68,10 +85,15 @@ class Point:
         pass
 
 
-ec = ECC(14, 5, 19)
-t = ec.allPoints()
-for i in t:
-    print(i)
+def advancedEuklid(a: int, b: int) -> tuple:
+    """erweiterter euklidischer Algorithmus zur Inversenberechnung"""
+    if a == 0:
+        return b, 0, 1
+    eeA, x1, y1 = advancedEuklid(b % a, a)
+    x = y1 - (b // a) * x1
+    y = x1
 
+    return eeA, x, y
 
-print(Point(1,1) == Point(1,1))
+ec = ECC(12, 4, 23)
+ec.double()
