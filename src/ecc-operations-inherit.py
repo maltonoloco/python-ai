@@ -48,7 +48,7 @@ class ECC:
             return p
         
         if p.get_inverted(self) == q:
-            return Point(0, 0, True)
+            return Point(0, 0, self,  True)
 
         eeA = advancedEuklid(self.p, q.x - p.x)
         d = eeA[2] % self.p
@@ -63,7 +63,7 @@ class Point(ECC):
     def __init__(self, x: int, y: int, ecc: object, inf = False):
         if not isinstance(ecc, ECC):
             raise TypeError("parameter ecc is not of type ECC")
-        if not (y ** 2) % ecc.p == (x ** 3 + ecc.a * x + ecc.b) % ecc.p:
+        if (((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p) and not inf) or (not ((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p)) and inf:
             raise ValueError("point is not on curve")
         ECC.__init__(self, ecc.a, ecc.b, ecc.p)
         self.x = x
@@ -91,10 +91,24 @@ class Point(ECC):
             raise ValueError("points are not on the same curve")
 
         ecc = self.get_super()
-        return ecc.double(self)
+        return ecc.add(self, obj)
 
-    def __mul__(self, obj: int) -> object:
-        pass
+    def __mul__(self, ctr: int) -> object:
+        if ctr < 1:
+            raise ValueError("cant multiply with int < 1")
+        res = self
+        for i in range(ctr - 1):
+            res = res + self
+        return res
+
+    def get_inverted(self, ecc: ECC) -> object:
+        if self.inf:
+            return self
+
+        inv = Point(self.x, -self.y, ECC(self.a, self.b, self.p))
+        while inv.y < 0:
+            inv.y += ecc.p
+        return inv
 
 
         
@@ -119,5 +133,6 @@ if __name__ == "__main__":
     ec1 = ECC(2, 2, 17)
     ec2 = ECC(3, 2, 17)
     p1 = Point(5, 1, ec1)
-    p2 = Point(5, 1, ec1)
-    print(p1 + p2)
+    p2 = Point(6, 3, ec1)
+    for i in range(19):
+        print(f"{i+1}:  {p1 * (i+1)}")
