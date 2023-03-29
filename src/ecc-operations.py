@@ -68,7 +68,7 @@ class ECC:
             return q
         elif q.inf:
             return p
-        if p.is_inverted(p = q, ecc = self):
+        if p.get_inverted(self) == q:
             return Point(0, 0, True)
         
         
@@ -81,11 +81,9 @@ class ECC:
         y3 = ((s * (p.x - x3)) - p.y) % self.p
 
         return Point(x3, y3)
-
-
-    def check_Point(self, p: object) -> bool:
-        pass
             
+    def satz_v_hasse(self) -> tuple:
+        pass
 
 class Point:
 
@@ -102,23 +100,56 @@ class Point:
             return f"({self.x} | {self.y})"
     
     def __eq__(self, obj: object) -> bool:
+        if not isinstance(obj, Point):
+            raise TypeError("obj is not of type Point")
         return (self.x == obj.x) and (self.y == obj.y)
 
 
-    def ord_Point(self, e: object) -> int:
-        pass
+    def ord_Point(self, e: ECC) -> int:
+        if not self.check(e):
+            raise ValueError(f"point is not on curve: {e}")
+
+        tmp = self
+        it = 1
+        while not tmp.inf:
+            if tmp == self:
+                tmp = e.double(self)
+            else:
+                tmp = e.add(tmp, self)
+            it += 1
+        return it
+            
 
 
-    def check(self, e: object) -> bool: 
+    def check(self, e: ECC) -> bool: 
         return (self.y ** 2) % e.p == (self.x ** 3 + e.a * self.x + e.b) % e.p
     
 
-    def is_inverted(self, p: object, ecc: object):
-        temp = Point(self.x, -self.y)
-        while temp.y < 0:
-            temp.y += ecc.p
-        return temp == p
+    def get_inverted(self, ecc: ECC) -> object:
+        if not self.check(ecc):
+            raise ValueError(f"point is not on curve: {ecc}")
+        if self.inf:
+            return self
 
+        inv = Point(self.x, -self.y)
+        while inv.y < 0:
+            inv.y += ecc.p
+        return inv
+    
+    def get_groups_of_Point(self, e: ECC) -> list:
+        if not self.check(e):
+            raise ValueError(f"point is not on curve: {e}")
+
+        tmp = self
+        ret = [self]
+        while not tmp.inf:
+            if tmp == self:
+                tmp = e.double(self)
+                ret.append(tmp)
+            else:
+                tmp = e.add(tmp, self)
+                ret.append(tmp)
+        return ret
 
 
 def advancedEuklid(a: int, b: int) -> tuple:
@@ -138,8 +169,10 @@ def is_prime(n: int) -> bool:
     return True
 
 if __name__ == "__main__":
-    c = ECC(2, 2, 17)
-    p = Point(5,1)
-    q = Point(10,6)
-    pq = c.add(p, q)
-    print(pq)
+    c = ECC(2,2,17)
+    p = Point(5, 1)
+    grp = p.get_groups_of_Point(c)
+    it = 1
+    for i in grp:
+        print(f"{it}: {i}")
+        it += 1
