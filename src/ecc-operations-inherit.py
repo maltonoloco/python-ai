@@ -63,7 +63,8 @@ class Point(ECC):
     def __init__(self, x: int, y: int, ecc: object, inf = False):
         if not isinstance(ecc, ECC):
             raise TypeError("parameter ecc is not of type ECC")
-        if (((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p) and not inf) or (not ((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p)) and inf:
+        if logical_xor(((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p), inf):
+        #if (((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p) and not inf) or (not ((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p)) and inf:
             raise ValueError("point is not on curve")
         ECC.__init__(self, ecc.a, ecc.b, ecc.p)
         self.x = x
@@ -128,6 +129,9 @@ def is_prime(n: int) -> bool:
         if (n%i) == 0:
             return False
     return True
+
+def logical_xor(b1: bool, b2: bool) -> bool:
+    return (b1 and not b2) or (not b1 and b2)
 
 if __name__ == "__main__":
     ec1 = ECC(2, 2, 17)
