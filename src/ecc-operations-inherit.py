@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 class ECC:
     def __init__(self, a: int, b: int, p: int):
         if not is_prime(p):
@@ -10,16 +12,16 @@ class ECC:
         self.b: int = b
         self.p: int = p
 
-    def __eq__(self, ecc: object) -> bool:
+    def __eq__(self, ecc: ECC) -> bool:
         return self.a == ecc.a and self.b == ecc.b and self.p == ecc.p
 
     def __str__(self) -> str:
         return f"y**2 = x**3 + {self.a} * x + {self.b} mod {self.p}"
 
-    def double(self, p: object) -> object:
-        if not isinstance(p, Point):
-            raise TypeError("p is not of type Point")
-
+    def double(self, p: Point) -> Point:
+        if not p.check(self):
+            raise ValueError(f"point p {p}is not on curve")
+        
         if p.inf:
             return p
 
@@ -34,11 +36,11 @@ class ECC:
         return Point(x3, y3, self, Point(x3, y3, self) == p)
      
 
-    def add(self, p: object, q: object) -> object:
-        if not isinstance(p, Point):
-            raise TypeError("p is not of type Point")
-        if not isinstance(q, Point):
-            raise TypeError("q is not of type Point")
+    def add(self, p: Point, q: Point) -> Point:
+        if not p.check(self):
+            raise ValueError(f"point p {p} is not on curve")
+        if not q.check(self):
+            raise ValueError(f"point q {q} is not on curve")
         if p == q:
             return self.double(p)
         
@@ -60,9 +62,7 @@ class ECC:
         return Point(x3, y3, self)
 
 class Point(ECC):
-    def __init__(self, x: int, y: int, ecc: object, inf = False):
-        if not isinstance(ecc, ECC):
-            raise TypeError("parameter ecc is not of type ECC")
+    def __init__(self, x: int, y: int, ecc: ECC, inf = False):
         if logical_xor(((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p), inf):
         #if (((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p) and not inf) or (not ((y ** 2) % ecc.p != (x ** 3 + ecc.a * x + ecc.b) % ecc.p)) and inf:
             raise ValueError("point is not on curve")
@@ -80,21 +80,19 @@ class Point(ECC):
     def get_super(self):
         return ECC(self.a, self.b, self.p)
     
-    def __eq__(self, obj: object) -> bool:
-        if not isinstance(obj, Point):
-            raise TypeError("obj is not of type Point")
+    def __eq__(self, obj: Point) -> bool:
         return (self.x == obj.x) and (self.y == obj.y) and (self.get_super() == obj.get_super())
 
-    def __add__(self, obj: object) -> object:
+    def __add__(self, obj: Point) -> Point:
         if not isinstance(obj, Point):
             raise TypeError(f"can not add {type(obj)} to Point")
-        if not self.get_super() == obj.get_super():
+        if self.get_super() != obj.get_super():
             raise ValueError("points are not on the same curve")
 
         ecc = self.get_super()
         return ecc.add(self, obj)
 
-    def __mul__(self, ctr: int) -> object:
+    def __mul__(self, ctr: int) -> Point:
         if ctr < 1:
             raise ValueError("cant multiply with int < 1")
         res = self
@@ -102,7 +100,7 @@ class Point(ECC):
             res = res + self
         return res
 
-    def get_inverted(self, ecc: ECC) -> object:
+    def get_inverted(self, ecc: ECC) -> Point:
         if self.inf:
             return self
 
@@ -139,4 +137,4 @@ if __name__ == "__main__":
     p1 = Point(5, 1, ec1)
     p2 = Point(6, 3, ec1)
     for i in range(19):
-        print(f"{i+1}:  {p1 * (i+1)}")
+        print(f"{i+1}:   {p1 * (i+1)}")
