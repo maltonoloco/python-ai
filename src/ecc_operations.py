@@ -17,7 +17,10 @@ class Point:
             return f"({self.x} | {self.y})"
     
     def __eq__(self, obj: Point) -> bool:
-        return (self.x == obj.x) and (self.y == obj.y)
+        if self.inf and obj.inf:
+            return True
+        else:
+            return (self.x == obj.x) and (self.y == obj.y)
 
 
     def ord_Point(self, ecc: ECC) -> int:
@@ -37,10 +40,6 @@ class Point:
 
 
     def check(self, ecc: ECC) -> bool:
-        if not isinstance(ecc, ECC):
-            raise TypeError("ecc is not of Type ECC")
-        if not self.check(ecc):
-            raise ValueError(f"point is not on curve: {ecc}")
         if self.inf:
             return self.inf
         else:
@@ -185,4 +184,4 @@ def is_prime(n: int) -> bool:
 if __name__ == "__main__":
     c = ECC(2,2,17)
     p = Point(5, 1)
-    print(c.satz_v_hasse())
+    c2 = ECC(5,16,17)
