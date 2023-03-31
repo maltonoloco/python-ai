@@ -128,6 +128,10 @@ class Point:
 
 
     def check(self, ecc: ECC) -> bool:
+        if not isinstance(ecc, ECC):
+            raise TypeError("ecc is not of Type ECC")
+        if not self.check(ecc):
+            raise ValueError(f"point is not on curve: {ecc}")
         if self.inf:
             return self.inf
         else:
@@ -135,6 +139,8 @@ class Point:
     
 
     def get_inverted(self, ecc: ECC) -> object:
+        if not isinstance(ecc, ECC):
+            raise TypeError("ecc is not of Type ECC")
         if not self.check(ecc):
             raise ValueError(f"point is not on curve: {ecc}")
         if self.inf:
@@ -150,6 +156,8 @@ class Point:
     
     def generate_subgroup(self, ecc: ECC) -> list:
         """generates subgroup of generator"""
+        if not isinstance(ecc, ECC):
+            raise TypeError("ecc is not of Type ECC")
         if not self.check(ecc):
             raise ValueError(f"point is not on curve: {ecc}")
 
@@ -176,6 +184,8 @@ def advancedEuklid(a: int, b: int) -> tuple:
     return eeA, x, y
 
 def is_prime(n: int) -> bool:
+    if type(n) != int:
+        raise TypeError("expexted an Integer n")
     for i in range(2,n):
         if (n%i) == 0:
             return False
