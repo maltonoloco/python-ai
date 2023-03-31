@@ -6,10 +6,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 def test_valid_elliptic_curve():
     ec = ECC.ECC(2, 2, 17)
+    ec = ECC.ECC(12, 4, 23)
+
+def test_not_valid_elliptic_curve():
     with pytest.raises(ValueError):
-        ec2 = ECC.ECC(2, 2, 18)
+        ec = ECC.ECC(2, 2, 18)
     with pytest.raises(ValueError):
-        ec3 = ECC.ECC(5, 16, 17)
+        ec = ECC.ECC(5, 16, 17)
     
 
 
