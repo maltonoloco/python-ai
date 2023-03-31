@@ -84,8 +84,6 @@ class Point(ECC):
         return (self.x == obj.x) and (self.y == obj.y) and (self.get_super() == obj.get_super())
 
     def __add__(self, obj: Point) -> Point:
-        if not isinstance(obj, Point):
-            raise TypeError(f"can not add {type(obj)} to Point")
         if self.get_super() != obj.get_super():
             raise ValueError("points are not on the same curve")
 
