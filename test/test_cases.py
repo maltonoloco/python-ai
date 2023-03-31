@@ -2,6 +2,7 @@ import sys, os
 from src import ecc_operations as ECC
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+
 def test_double():
     ecc = ECC.ECC(2, 2, 17)
     p = ECC.Point(5, 1)
@@ -101,5 +102,3 @@ def test_get_inverted():
         print("valid")
     else:
         print("not valid")
-
-
